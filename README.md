@@ -72,8 +72,8 @@ The app needs an Unsplash **Access Key** (Client-ID).
 ---
 
 ## Screenshots / Demo
+<img width="1206" height="2622" alt="simulator_screenshot_596BD0A8-4608-4C77-979A-6FEC0E2B33E0" src="https://github.com/user-attachments/assets/dfeed738-37c4-4b47-9c2f-c2084f18f39a" />
+<img width="1206" height="2622" alt="simulator_screenshot_F3A5190D-A052-430E-ABCD-92E7AAB8C345" src="https://github.com/user-attachments/assets/42a836d2-eadb-4053-a78f-b204a6581b31" />
 
-<img width="1206" height="2622" alt="simulator_screenshot_D62A339B-614E-4F8B-912F-8857712B1036" src="https://github.com/user-attachments/assets/a5b2e3c0-a893-40b1-903e-0e7cbd9be584" />
-<img width="1206" height="2622" alt="simulator_screenshot_110A5A63-259F-4C49-AEEE-B7C20C612E25" src="https://github.com/user-attachments/assets/886fa767-9f60-463f-914a-f73754bc5c0b" />
 
 
