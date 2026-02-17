@@ -1,0 +1,38 @@
+{
+  "configurations" : [
+    {
+      "id" : "F4B58E74-195C-40F3-AC85-5BDF10E4D294",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:GalleryAppV3.xcodeproj",
+      "identifier" : "6F50597E2F3B58D900E9F585",
+      "name" : "GalleryAppV3"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:GalleryAppV3.xcodeproj",
+        "identifier" : "6F5059972F3B58DC00E9F585",
+        "name" : "GalleryAppV3Tests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:GalleryAppV3.xcodeproj",
+        "identifier" : "6F5059A12F3B58DD00E9F585",
+        "name" : "GalleryAppV3UITests"
+      }
+    }
+  ],
+  "version" : 1
+}

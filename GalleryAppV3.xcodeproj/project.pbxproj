@@ -27,6 +27,7 @@
 		6F50597F2F3B58D900E9F585 /* GalleryAppV3.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GalleryAppV3.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F5059982F3B58DC00E9F585 /* GalleryAppV3Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GalleryAppV3Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F5059A22F3B58DD00E9F585 /* GalleryAppV3UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GalleryAppV3UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F505A692F43281000E9F585 /* GalleryAppV3.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = GalleryAppV3.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -88,6 +89,7 @@
 		6F5059762F3B58D900E9F585 = {
 			isa = PBXGroup;
 			children = (
+				6F505A692F43281000E9F585 /* GalleryAppV3.xctestplan */,
 				6F5059812F3B58D900E9F585 /* GalleryAppV3 */,
 				6F50599B2F3B58DC00E9F585 /* GalleryAppV3Tests */,
 				6F5059A52F3B58DD00E9F585 /* GalleryAppV3UITests */,

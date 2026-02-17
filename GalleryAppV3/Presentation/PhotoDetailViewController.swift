@@ -25,7 +25,7 @@ final class PhotoDetailViewController: UIViewController {
         didSet { updateFavoriteButton() }
     }
 
-    var hideNavBarFavoriteButton: Bool = false
+    var imageLoader: ImageLoadingServiceProtocol?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,7 +37,6 @@ final class PhotoDetailViewController: UIViewController {
     }
 
     private func configureFavoriteButton() {
-        guard !hideNavBarFavoriteButton else { return }
         let button = UIBarButtonItem(image: nil, style: .plain, target: self, action: #selector(favoriteTapped))
         favoriteBarButton = button
         navigationItem.rightBarButtonItem = button
@@ -73,20 +72,22 @@ final class PhotoDetailViewController: UIViewController {
         view.addSubview(descriptionLabel)
         view.addSubview(authorLabel)
 
+        let margin = AppConstants.Layout.detailHorizontalMargin
+        let spacing = AppConstants.Layout.detailVerticalSpacing
         NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: spacing),
+            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: margin),
+            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -margin),
             imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor),
 
-            descriptionLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 16),
-            descriptionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            descriptionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            descriptionLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: spacing),
+            descriptionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: margin),
+            descriptionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -margin),
 
-            authorLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 8),
+            authorLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: AppConstants.Layout.detailAuthorTopSpacing),
             authorLabel.leadingAnchor.constraint(equalTo: descriptionLabel.leadingAnchor),
             authorLabel.trailingAnchor.constraint(equalTo: descriptionLabel.trailingAnchor),
-            authorLabel.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+            authorLabel.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -spacing)
         ])
     }
 
@@ -94,16 +95,18 @@ final class PhotoDetailViewController: UIViewController {
         guard let photo = photo else { return }
         guard imageView.superview != nil else { return }
 
-        descriptionLabel.text = photo.description ?? "Без описания"
-        authorLabel.text = "Автор: \(photo.userName)"
+        descriptionLabel.text = photo.description ?? NSLocalizedString("detail.no_description", comment: "")
+        authorLabel.text = String(format: NSLocalizedString("detail.author_format", comment: ""), photo.userName)
         imageView.image = nil
 
-        URLSession.shared.dataTask(with: photo.regularURL) { [weak self] data, _, _ in
-            guard let data = data, let image = UIImage(data: data) else { return }
-            DispatchQueue.main.async {
+        imageLoader?.load(url: photo.regularURL) { [weak self] result in
+            switch result {
+            case .success(let image):
                 self?.imageView.image = image
+            case .failure:
+                self?.imageView.image = nil
             }
-        }.resume()
+        }
     }
 }
 

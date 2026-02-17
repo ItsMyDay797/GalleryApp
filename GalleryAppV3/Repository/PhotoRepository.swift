@@ -10,6 +10,7 @@ import Foundation
 protocol PhotoRepositoryProtocol {
     func loadFirstPage(completion: @escaping (Result<[Photo], Error>) -> Void)
     func loadNextPage(completion: @escaping (Result<[Photo], Error>) -> Void)
+    func loadPhoto(id: String, completion: @escaping (Result<Photo, Error>) -> Void)
     func reset()
 }
 
@@ -22,7 +23,7 @@ final class PhotoRepository: PhotoRepositoryProtocol {
     private var isLoading: Bool = false
     private var hasMore: Bool = true
 
-    init(apiClient: UnsplashAPIClientProtocol, perPage: Int = 30) {
+    init(apiClient: UnsplashAPIClientProtocol, perPage: Int = AppConstants.Repository.photosPerPage) {
         self.apiClient = apiClient
         self.perPage = perPage
     }
@@ -58,6 +59,10 @@ final class PhotoRepository: PhotoRepositoryProtocol {
                 completion(.failure(error))
             }
         }
+    }
+
+    func loadPhoto(id: String, completion: @escaping (Result<Photo, Error>) -> Void) {
+        apiClient.fetchPhoto(id: id, completion: completion)
     }
 }
 

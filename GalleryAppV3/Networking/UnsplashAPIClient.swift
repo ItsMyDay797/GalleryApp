@@ -19,7 +19,7 @@ enum UnsplashAPIError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .missingAccessKey:
-            return "В Info.plist не задан UNSPLASH_ACCESS_KEY."
+            return "Не задан UNSPLASH_ACCESS_KEY (Config/Secrets.plist или Info.plist)."
         case .invalidURL:
             return "Неверный URL запроса."
         case .decodingFailed:
@@ -36,6 +36,7 @@ enum UnsplashAPIError: LocalizedError {
 
 protocol UnsplashAPIClientProtocol {
     func fetchPhotos(page: Int, perPage: Int, completion: @escaping (Result<[Photo], Error>) -> Void)
+    func fetchPhoto(id: String, completion: @escaping (Result<Photo, Error>) -> Void)
 }
 
 final class UnsplashAPIClient: UnsplashAPIClientProtocol {
@@ -51,7 +52,7 @@ final class UnsplashAPIClient: UnsplashAPIClientProtocol {
     init(session: URLSession = .shared) throws {
         self.session = session
 
-        guard let key = Bundle.main.object(forInfoDictionaryKey: "UNSPLASH_ACCESS_KEY") as? String, key.isEmpty == false else {
+        guard let key = ConfigLoader.unsplashAccessKey() else {
             throw UnsplashAPIError.missingAccessKey
         }
         self.accessKey = key
@@ -116,6 +117,43 @@ final class UnsplashAPIClient: UnsplashAPIClientProtocol {
             }
         }
 
+        task.resume()
+    }
+
+    func fetchPhoto(id: String, completion: @escaping (Result<Photo, Error>) -> Void) {
+        let url = baseURL.appendingPathComponent("/photos/\(id)")
+        var request = URLRequest(url: url)
+        request.setValue("Client-ID \(accessKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("v1", forHTTPHeaderField: "Accept-Version")
+
+        let task = session.dataTask(with: request) { data, response, error in
+            if let error = error {
+                DispatchQueue.main.async { completion(.failure(UnsplashAPIError.network(error))) }
+                return
+            }
+            if let http = response as? HTTPURLResponse, http.statusCode != 200 {
+                let message = (http.statusCode == 401)
+                    ? "Неверный API-ключ Unsplash."
+                    : "Ответ сервера: \(http.statusCode)"
+                DispatchQueue.main.async {
+                    completion(.failure(UnsplashAPIError.serverError(statusCode: http.statusCode, message: message)))
+                }
+                return
+            }
+            guard let data = data else {
+                DispatchQueue.main.async { completion(.failure(UnsplashAPIError.unknown)) }
+                return
+            }
+            do {
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                let dto = try decoder.decode(PhotoDTO.self, from: data)
+                let photo = try dto.toDomain()
+                DispatchQueue.main.async { completion(.success(photo)) }
+            } catch {
+                DispatchQueue.main.async { completion(.failure(UnsplashAPIError.decodingFailed)) }
+            }
+        }
         task.resume()
     }
 }

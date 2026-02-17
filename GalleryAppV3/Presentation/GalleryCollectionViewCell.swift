@@ -49,10 +49,10 @@ final class GalleryCollectionViewCell: UICollectionViewCell {
             imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
 
-            favoriteButton.widthAnchor.constraint(equalToConstant: 44),
-            favoriteButton.heightAnchor.constraint(equalToConstant: 44),
-            favoriteButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -4),
-            favoriteButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4)
+            favoriteButton.widthAnchor.constraint(equalToConstant: AppConstants.Layout.favoriteButtonSize),
+            favoriteButton.heightAnchor.constraint(equalToConstant: AppConstants.Layout.favoriteButtonSize),
+            favoriteButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -AppConstants.Layout.favoriteButtonMargin),
+            favoriteButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -AppConstants.Layout.favoriteButtonMargin)
         ])
     }
 

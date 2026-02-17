@@ -1,0 +1,14 @@
+/* Gallery */
+"gallery.title" = "Gallery";
+"gallery.favorites.title" = "Избранное";
+
+/* Alerts */
+"alert.error_title" = "Ошибка";
+"alert.ok" = "OK";
+
+/* Detail */
+"detail.no_description" = "Без описания";
+"detail.author_format" = "Автор: %@";
+
+/* Config */
+"config.missing_key" = "Добавьте Config/Secrets.plist с ключом UNSPLASH_ACCESS_KEY.";

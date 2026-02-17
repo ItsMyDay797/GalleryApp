@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  FavoritesViewController.swift
 //  GalleryAppV3
 //
 //  Created by Марк Русаков on 10.02.26.
@@ -7,17 +7,14 @@
 
 import UIKit
 
-final class ViewController: UIViewController {
+final class FavoritesViewController: UIViewController {
 
     private var collectionView: UICollectionView?
-    private let viewModel: GalleryViewModel
+    private let viewModel: FavoritesViewModel
     private let favoritesStore: FavoritesStoreProtocol
     private let imageLoader: ImageLoadingServiceProtocol
-    private var previousPhotoCount = 0
 
-    var openFavorites: ((FavoritesStoreProtocol) -> UIViewController?)?
-
-    init(viewModel: GalleryViewModel, favoritesStore: FavoritesStoreProtocol, imageLoader: ImageLoadingServiceProtocol) {
+    init(viewModel: FavoritesViewModel, favoritesStore: FavoritesStoreProtocol, imageLoader: ImageLoadingServiceProtocol) {
         self.viewModel = viewModel
         self.favoritesStore = favoritesStore
         self.imageLoader = imageLoader
@@ -31,29 +28,14 @@ final class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        title = NSLocalizedString("gallery.title", comment: "")
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            title: NSLocalizedString("gallery.favorites.title", comment: ""),
-            style: .plain,
-            target: self,
-            action: #selector(openFavoritesTapped)
-        )
+        title = NSLocalizedString("gallery.favorites.title", comment: "")
         configureCollectionView()
         viewModel.reload()
     }
 
-    @objc private func openFavoritesTapped() {
-        guard let vc = openFavorites?(favoritesStore) else { return }
-        navigationController?.pushViewController(vc, animated: true)
-    }
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        guard let cv = collectionView else { return }
-        let indexPaths = cv.indexPathsForVisibleItems
-        if !indexPaths.isEmpty {
-            cv.reloadItems(at: indexPaths)
-        }
+        viewModel.reload()
     }
 
     private func configureCollectionView() {
@@ -77,46 +59,27 @@ final class ViewController: UIViewController {
             cv.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             cv.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-
         collectionView = cv
     }
+}
 
-    private func showError(_ error: Error) {
-        let alert = UIAlertController(title: NSLocalizedString("alert.error_title", comment: ""), message: error.localizedDescription, preferredStyle: .alert)
+extension FavoritesViewController: FavoritesViewModelDelegate {
+    func favoritesDidUpdate() {
+        collectionView?.reloadData()
+    }
+
+    func favoritesDidFail(with error: Error) {
+        let alert = UIAlertController(
+            title: NSLocalizedString("alert.error_title", comment: ""),
+            message: error.localizedDescription,
+            preferredStyle: .alert
+        )
         alert.addAction(UIAlertAction(title: NSLocalizedString("alert.ok", comment: ""), style: .default))
         present(alert, animated: true)
     }
 }
 
-// MARK: - GalleryViewModelDelegate
-
-extension ViewController: GalleryViewModelDelegate {
-    func galleryDidUpdate(reloadAll: Bool) {
-        guard let cv = collectionView else { return }
-        let count = viewModel.photos.count
-        if reloadAll {
-            previousPhotoCount = count
-            cv.reloadData()
-        } else {
-            let newCount = count - previousPhotoCount
-            guard newCount > 0 else { return }
-            let start = previousPhotoCount
-            let indexPaths = (start..<count).map { IndexPath(item: $0, section: 0) }
-            previousPhotoCount = count
-            cv.performBatchUpdates {
-                cv.insertItems(at: indexPaths)
-            }
-        }
-    }
-
-    func galleryDidFail(with error: Error) {
-        showError(error)
-    }
-}
-
-// MARK: - UICollectionViewDataSource
-
-extension ViewController: UICollectionViewDataSource {
+extension FavoritesViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         viewModel.photos.count
     }
@@ -134,10 +97,10 @@ extension ViewController: UICollectionViewDataSource {
         cell.configure(with: nil, isFavorite: isFav)
         cell.onFavoriteTap = { [weak self] in
             self?.viewModel.toggleFavorite(id: photo.id)
-            self?.collectionView?.reloadItems(at: [indexPath])
+            self?.viewModel.reload()
         }
 
-        viewModel.thumbnail(for: photo) { [weak self] result in
+        imageLoader.load(url: photo.smallURL) { [weak self] result in
             guard cell.displayedPhotoId == photo.id else { return }
             let image = try? result.get()
             cell.configure(with: image, isFavorite: self?.viewModel.isFavorite(id: photo.id) ?? false)
@@ -147,25 +110,16 @@ extension ViewController: UICollectionViewDataSource {
     }
 }
 
-// MARK: - UICollectionViewDelegate
-
-extension ViewController: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
+extension FavoritesViewController: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let photos = viewModel.photos
         guard !photos.isEmpty else { return }
-        let pageVC = PhotoDetailPageViewController(
-            transitionStyle: .scroll,
-            navigationOrientation: .horizontal
-        )
+        let pageVC = PhotoDetailPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
         pageVC.photos = photos
         pageVC.initialIndex = indexPath.item
         pageVC.favoritesStore = favoritesStore
         pageVC.imageLoader = imageLoader
         navigationController?.pushViewController(pageVC, animated: true)
-    }
-
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        viewModel.loadMoreIfNeeded(currentIndex: indexPath.item)
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -177,4 +131,3 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDelegateFlow
         return CGSize(width: width, height: width)
     }
 }
-
